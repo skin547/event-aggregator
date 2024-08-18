@@ -9,6 +9,7 @@ import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.streaming.StreamingQueryException;
 import org.apache.spark.sql.streaming.Trigger;
 import org.apache.spark.sql.types.DataTypes;
+import static org.apache.spark.sql.functions.*;
 
 public class SparkApp {
 
@@ -28,11 +29,12 @@ public class SparkApp {
         //
         // The spark stream should collect, in the database, for each time bucket and event id, a counter of all the messages received.
         // The time bucket has a granularity of 1 minute.
-        events
-                .writeStream()
-                .format("console")
-                .trigger(Trigger.ProcessingTime(10, TimeUnit.SECONDS))
-                .start();
+        Dataset<Row> counts = counts(events);
+        writeToDatabase(counts.select(
+                        col("eventId"),
+                        col("count"),
+                        date_trunc("minute", col("window.start")).as("timeBucket"))
+                , "EventAggregation");
 
         // the stream will run forever
         spark.streams().awaitAnyTermination();
@@ -46,6 +48,39 @@ public class SparkApp {
                 .load()
                 .withColumn("eventId", functions.rand(System.currentTimeMillis()).multiply(functions.lit(100)).cast(DataTypes.LongType))
                 .select("eventId", "timestamp");
+    }
+
+    private static Dataset<Row> counts(Dataset<Row> events) {
+        return events
+                .repartition(200)
+                .withWatermark("timestamp", "1 minutes")
+                .groupBy(
+                        window(col("timestamp"), "1 minutes"),
+                        col("eventId"))
+                .count();
+    }
+
+    private static void writeToDatabase(Dataset<Row> events, String tableName) {
+        String jdbcUrl = "jdbc:hsqldb:hsql://localhost/xdb";
+        String jdbcDriver = "org.hsqldb.jdbc.JDBCDriver";
+        String jdbcUser = "sa";
+        String jdbcPassword = "";
+
+        events.writeStream()
+                .outputMode("complete")
+                .foreachBatch((batchDF, batchId) -> {
+                    batchDF.write()
+                            .format("jdbc")
+                            .option("url", jdbcUrl)
+                            .option("driver", jdbcDriver)
+                            .option("dbtable", tableName)
+                            .option("user", jdbcUser)
+                            .option("password", jdbcPassword)
+                            .mode("append")
+                            .save();
+                })
+                .trigger(Trigger.ProcessingTime(1, TimeUnit.MINUTES))
+                .start();
     }
 
 }

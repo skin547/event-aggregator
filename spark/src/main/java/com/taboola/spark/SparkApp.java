@@ -44,7 +44,7 @@ public class SparkApp {
         return spark
                 .readStream()
                 .format("rate")
-                .option("rowsPerSecond", "10000")
+                .option("rowsPerSecond", "170000")
                 .load()
                 .withColumn("eventId", functions.rand(System.currentTimeMillis()).multiply(functions.lit(100)).cast(DataTypes.LongType))
                 .select("eventId", "timestamp");
@@ -52,7 +52,7 @@ public class SparkApp {
 
     private static Dataset<Row> counts(Dataset<Row> events) {
         return events
-                .repartition(200)
+                .repartition(4)
                 .withWatermark("timestamp", "1 minutes")
                 .groupBy(
                         window(col("timestamp"), "1 minutes"),
@@ -79,7 +79,7 @@ public class SparkApp {
                             .mode("append")
                             .save();
                 })
-                .trigger(Trigger.ProcessingTime(1, TimeUnit.MINUTES))
+                .trigger(Trigger.ProcessingTime(10, TimeUnit.SECONDS))
                 .start();
     }
 

@@ -67,7 +67,7 @@ public class SparkApp {
         String jdbcPassword = "";
 
         events.writeStream()
-                .outputMode("complete")
+                .outputMode("append")
                 .foreachBatch((batchDF, batchId) -> {
                     batchDF.write()
                             .format("jdbc")

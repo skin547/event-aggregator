@@ -24,8 +24,6 @@ public class HsqlDatabase implements CounterRepository {
 
     @Override
     public List<Counter> getCounters(TimeBucket timeBucket) {
-        System.out.println("TimeBucket.timeBucket.getTimeBucketString(): " + timeBucket.getTimeBucketString());
-        System.out.println("TimeBucket.timeBucket.getTimestamp(): " + timeBucket.getTimestamp());
         try {
             String sql = "SELECT * FROM EventAggregation WHERE \"timeBucket\" = ?";
             PreparedStatement preparedStatement = this.c.prepareStatement(sql);
@@ -47,8 +45,6 @@ public class HsqlDatabase implements CounterRepository {
 
     @Override
     public Counter getCountersOfEvent(TimeBucket timeBucket, String event) {
-        System.out.println("TimeBucket.timeBucket.getTimeBucketString(): " + timeBucket.getTimeBucketString());
-        System.out.println("TimeBucket.timeBucket.getTimestamp(): " + timeBucket.getTimestamp());
         try {
             String sql = "SELECT * FROM EventAggregation WHERE \"timeBucket\" = ? AND \"eventId\" = ?";
             PreparedStatement preparedStatement = this.c.prepareStatement(sql);

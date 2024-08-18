@@ -28,13 +28,13 @@ public class Controller {
     }
 
 
-    // 第一個 API: 根據 time bucket 獲取 counters
+    // the timeBucket should be like yyyyMMddHHmm
     @GetMapping("/counters/time/{timeBucket}")
     public List<Counter> getCountersByTimeBucket(@PathVariable("timeBucket") String timeBucket) {
         return this.service.getCounters(timeBucket);
     }
 
-    // 第二個 API: 根據 time bucket 和 event id 獲取特定 counter
+    // the timeBucket should be like yyyyMMddHHmm
     @GetMapping("/counters/time/{timeBucket}/eventId/{eventId}")
     public Counter getCounterByTimeBucketAndEventId(@PathVariable("timeBucket") String timeBucket,
                                                     @PathVariable("eventId") String eventId) {

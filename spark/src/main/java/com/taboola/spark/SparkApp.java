@@ -53,6 +53,7 @@ public class SparkApp {
     private static Dataset<Row> counts(Dataset<Row> events) {
         return events
                 .repartition(4)
+//        https://spark.apache.org/docs/3.2.4/structured-streaming-programming-guide.html#handling-late-data-and-watermarking
                 .withWatermark("timestamp", "1 minutes")
                 .groupBy(
                         window(col("timestamp"), "1 minutes"),

@@ -19,7 +19,7 @@ public class TimeBucket {
             SimpleDateFormat dateFormat = new SimpleDateFormat(DATE_FORMAT);
             return new Timestamp(dateFormat.parse(timeBucketString).getTime());
         } catch (ParseException e) {
-            throw new IllegalArgumentException("Invalid time bucket format: " + timeBucketString, e);
+            throw new IllegalArgumentException("Invalid time bucket format, should be " + DATE_FORMAT, e);
         }
     }
 

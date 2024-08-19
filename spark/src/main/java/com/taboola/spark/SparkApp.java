@@ -14,7 +14,7 @@ import static org.apache.spark.sql.functions.*;
 public class SparkApp {
 
     public static void main(String[] args) throws StreamingQueryException {
-        SparkSession spark = SparkSession.builder().master("local[4]").getOrCreate();
+        SparkSession spark = SparkSession.builder().master("local[4]").config("spark.sql.shuffle.partitions", "8").getOrCreate();
 
         // generate events
         // each event has an id (eventId) and a timestamp
@@ -44,7 +44,7 @@ public class SparkApp {
         return spark
                 .readStream()
                 .format("rate")
-                .option("rowsPerSecond", "170000")
+                .option("rowsPerSecond", "1000000")
                 .load()
                 .withColumn("eventId", functions.rand(System.currentTimeMillis()).multiply(functions.lit(100)).cast(DataTypes.LongType))
                 .select("eventId", "timestamp");

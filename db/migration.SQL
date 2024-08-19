@@ -1,6 +1,6 @@
 create table EventAggregation(
     "timeBucket" timestamp,
     "count" bigint ,
-    "eventId" bigint,
+    "eventId" tinyint,
     PRIMARY KEY ("timeBucket", "eventId")
 )
